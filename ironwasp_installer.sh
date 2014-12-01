@@ -16,14 +16,24 @@ echo ""
 echo "Script Written by Anant shrivastava http://anantshri.info"
 echo "Grab the latest script here : https://github.com/anantshri/ironwasp_installer"
 echo ""
-read -p "press any key to continue" input_cmd
 # check if wine is installed.
-if which wine >/dev/null; then
+if [ -a "${HOME}/IRONWASP/" ]
+then
+	echo "Please rename IRONWASP directory in your home folder"
+	echo "This might be present if you have run this script before"
+	echo "In case you already have Ironwasp"
+	echo "IronWASP will automatically call for update"
+	echo "Thanks for using the script"
+	exit
+fi
+read -p "press any key to continue" input_cmd
+if which wine >/dev/null
+then
 	echo "Creating directories"
 	export WINEARCH=win32
 	PTH="${HOME}/IRONWASP"
 	iPTH=$PTH"/installer"
-	#mkdir $PTH
+	mkdir $PTH
 	echo "Starting Wine configuration"
 	WINEPREFIX=$PTH wineboot
 	mkdir $iPTH
@@ -32,41 +42,34 @@ if which wine >/dev/null; then
 	WINEPREFIX=$PTH sh $iPTH/winetricks dotnet20sp2 fontfix
 	wget http://ironwasp.org/ironwasp.zip -O $iPTH/ironwasp.zip
 	unzip $iPTH/ironwasp.zip -d $PTH/drive_c/
-	#rm -rf $PTH
-	#create a script on desktop
-	#cat << EOF  > ~/Desktop/IronWasp
-	#!/bin/bash
-	#cd $PTH
-	#WINEPREFIX=$PTH wine 'c:/IronWASP/IronWASP.exe'
-	#EOF
-	#chmod +x ~/Desktop/IronWasp
-	if [ "$(uname)" == "Darwin" ]; then
-	    # Do something under Mac OS X platform        
-	    echo "Mac detected"
-	    echo "Creating a mac application"
-	    if [ -a "~/Applications/IronWASP.app" ]
+	if [ "$(uname)" == "Darwin" ]
+	then
+		echo "MacOSX detected"
+		echo "Creating a mac application"
+	    if [ -a "$PTH/MACApp/IronWASP.app" ]
+	    then
 	    	echo "IronWASP Application entry already exist"
 	    	echo "Rerun the whole setup if you thing this is wrong"
 	    	exit
 	    else
-		    mkdir -p ~/Applications/IronWASP.app/Contents/MacOS
-		    cat << EOF  > $PTH/IronWASP.app/Contents/MacOS/IronWASP
-			#!/bin/bash
-			cd $PTH
-			WINEPREFIX=$PTH wine 'c:/IronWASP/IronWASP.exe'
-			EOF
-			chmod +x $PTH/IronWASP.app/Contents/MacOS/IronWASP
+	    	echo "Installing the IronWASP Application"
+		    mkdir -p "$PTH/MACApp/IronWASP.app/Contents/MacOS"
+		    echo "#!/bin/bash" > $PTH/MACApp/IronWASP.app/Contents/MacOS/IronWASP
+		    echo "cd $PTH"  >> $PTH/MACApp/IronWASP.app/Contents/MacOS/IronWASP
+			echo "WINEPREFIX=$PTH wine 'c:/IronWASP/IronWASP.exe'" >> $PTH/MACApp/IronWASP.app/Contents/MacOS/IronWASP
+		    chmod +x $PTH/MACApp/IronWASP.app/Contents/MacOS/IronWASP
+		    ln -s $PTH/MACApp/IronWASP.app ~/Applications/IronWASP.app 
 		fi
-	elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-		echo "Linux detected"
+	elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]
+	then
+		echo "Linux Detected"
 		echo "Shortcut created on desktop"
-		cat << EOF  > ~/Desktop/IronWasp
-		#!/bin/bash
-		cd $PTH
-		WINEPREFIX=$PTH wine 'c:/IronWASP/IronWASP.exe'
-		EOF
+		echo "#!/bin/bash" > ~/Desktop/IronWasp
+		echo "cd $PTH" >> ~/Desktop/IronWasp
+		echo "WINEPREFIX=$PTH wine 'c:/IronWASP/IronWASP.exe'" >> ~/Desktop/IronWasp
 		chmod +x ~/Desktop/IronWasp
 	fi
+	
 else
     echo "We need Wine for this process to work properly"
     echo "Please install wine as per your system"
